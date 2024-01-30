@@ -2,11 +2,11 @@ from turtle import Turtle
 
 layer = [-350, -250, -150, -50, 50, 150, 250, 350]
 #layer = [-350, -250, -150, -50, 150, 250, 350]
-y_start = 200
-layer_thickness = 20
+y_start = 0
+layer_thickness = 15
 no_layers = 7
 
-class Wall(Turtle):
+class Obstacle(Turtle):
     def __init__(self):
         super().__init__()
         self.brick_pos = []
@@ -24,9 +24,9 @@ class Wall(Turtle):
     def add_brick(self, position):
         """Add brick to given position"""
         new_brick = Turtle(shape="square")
-        new_brick.color("brown")
+        new_brick.color("cyan")
         new_brick.penup()
-        new_brick.shapesize(stretch_wid=0.8, stretch_len=4.8)
+        new_brick.shapesize(stretch_wid=0.4, stretch_len=2.4)
         new_brick.goto(position)
 
     def remove_brick(self, position):

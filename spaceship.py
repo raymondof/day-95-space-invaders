@@ -30,7 +30,7 @@ class Spaceship(Turtle):
         ammo.color("green")
         ammo.left(90)
         ammo.shapesize(stretch_wid=0.2, stretch_len=1)
-        ammo.goto(self.xcor(), self.ycor()+7)
+        ammo.goto(self.xcor(), self.ycor() + 7)
 
         self.ammo_pos.append(ammo)
 
