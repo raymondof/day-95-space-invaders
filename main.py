@@ -19,7 +19,7 @@ paddle_start_coordinates = (0, -200)
 spaceship = Spaceship(paddle_start_coordinates)
 
 wall = Obstacle()
-wall.build_wall()
+
 scoreboard = Scoreboard()
 aliens = Aliens()
 
@@ -36,17 +36,15 @@ def start_game():
     global game_is_on
     # if not game_is_on:
     game_is_on = True
+    wall.build_wall()
     game_loop()
-
-    # else:
-    #     is_paused = not is_paused
 
 
 screen.listen()
+screen.onkey(fun=start_game, key="Return")
+
 screen.onkey(spaceship.move_left, "Left")
 screen.onkey(spaceship.move_right, "Right")
-
-screen.onkey(fun=start_game, key="Return")
 screen.onkey(spaceship.shoot, key="space")
 scoreboard.write_instructions()
 
@@ -55,6 +53,7 @@ ufo_ammos = 50  # the smaller the value, the more ammo ufos will shoot start wit
 
 def game_loop():
     global game_is_on, ufo_ammos
+    screen.listen()
 
     unique_brick = []
     ufo_x_coords = []
@@ -65,6 +64,7 @@ def game_loop():
     scoreboard.available_ships(ships)
     scoreboard.write_score()
     aliens.place_ships()
+
     while game_is_on:
 
         screen.update()
@@ -152,6 +152,7 @@ def game_loop():
                     if len(aliens.ufos) == 0:
                         scoreboard.finish()
                         ufo_ammos -= 5
+                        game_is_on = False
 
                         # Wait for the user to press Enter
                         wait_for_enter()
