@@ -6,6 +6,7 @@ y_start = 250
 layer_thickness = 25
 no_layers = 3
 
+
 class Aliens(Turtle):
     def __init__(self):
         super().__init__()
@@ -14,12 +15,11 @@ class Aliens(Turtle):
 
     def place_ships(self):
         """Place spaceships on the screen based on the values given above"""
-        for round in range(no_layers):
-            y_pos = y_start - layer_thickness * round
+        for layer in range(no_layers):
+            y_pos = y_start - layer_thickness * layer
             for count, ufo in enumerate(initial_x_coords):
                 position = (ufo, y_pos)
                 self.add_ufo(position)
-
 
     def add_ufo(self, position):
         """Place alien in given position"""
@@ -37,15 +37,21 @@ class Aliens(Turtle):
         self.ufos.remove(ufo)
         ufo.hideturtle()
         ufo.clear()
+        print(f"ufoja jäljellä {len(self.ufos)}")
 
-
-    def move_ufos(self, direction):
+    def move_ufos_sideways(self, direction):
         for ufo in self.ufos:
             ufo_to_move = ufo
             current_x = ufo_to_move.xcor()
             new_x = current_x + 2 * direction
             current_y = ufo_to_move.ycor()
             ufo_to_move.goto(new_x, current_y)
+
+    def move_ufos_lower(self):
+        for ufo in self.ufos:
+            # current_y = ufo.ycor()
+            # new_y = current_y - 5
+            ufo.forward(5)
 
     def shoot(self, ufo):
         ufo_x = ufo.xcor()
@@ -64,3 +70,9 @@ class Aliens(Turtle):
         for ammo in self.ammo_pos:
             ammo_to_move = ammo
             ammo_to_move.forward(3)
+
+    def remove_ammo(self, position):
+        for ammo in self.ammo_pos:
+            if ammo.pos() == position:
+                ammo.hideturtle()
+                ammo.clear()

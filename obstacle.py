@@ -1,10 +1,10 @@
 from turtle import Turtle
 
 layer = [-350, -250, -150, -50, 50, 150, 250, 350]
-#layer = [-350, -250, -150, -50, 150, 250, 350]
 y_start = 0
 layer_thickness = 15
 no_layers = 7
+
 
 class Obstacle(Turtle):
     def __init__(self):
@@ -13,9 +13,8 @@ class Obstacle(Turtle):
 
     def build_wall(self):
         """Build the wall based on values given above"""
-        for round in range(no_layers):
-            y_pos = y_start - layer_thickness * round
-            #print(y_pos)
+        for brick_layer in range(no_layers):
+            y_pos = y_start - layer_thickness * brick_layer
             for count, brick in enumerate(layer):
                 position = (brick, y_pos)
                 self.add_brick(position)
@@ -35,9 +34,3 @@ class Obstacle(Turtle):
             if brick.pos() == position:
                 brick.hideturtle()  # hide the brick
                 brick.clear()  # Clear the brick's drawing
-
-
-
-
-
-

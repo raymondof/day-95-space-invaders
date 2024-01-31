@@ -26,8 +26,9 @@ class Scoreboard(Turtle):
     def write_instructions(self):
         self.clear()
         self.setposition(0, 0)
-        self.write(f"Your task is to escape breaking as few bricks as\n possible "
-                   f"start the game by pressing ENTER",
+        self.write(f"Your task is to destroy aliens as soon as\npossible "
+                   f"start the game by pressing ENTER\n"
+                   f"Move with arrows and shoot with SPACE",
                    move=False, align="center", font=FONT)
 
     def game_on_pause(self):
@@ -42,15 +43,13 @@ class Scoreboard(Turtle):
             print(f"space {self.space_pos}")
 
     def finish(self):
-        self.clear()
-
-        self.write(f"You have finished the game by breaking {self.score} bricks",
+        self.setposition(0, 0)
+        self.write(f"You have finished the level with {self.score} points",
                    move=False, align="center", font=FONT)
         self.reset_game()
 
     def end_game(self):
-        self.clear()
-        print("game over")
+        self.setposition(0, 0)
         self.write(f"Game over! Better luck next time!",
                    move=False, align="center", font=FONT)
 
@@ -94,10 +93,3 @@ class Scoreboard(Turtle):
         removable_ship = self.available_ship_positions.pop()
         removable_ship.hideturtle()
         removable_ship.clear()
-
-
-
-
-
-
-

@@ -1,8 +1,8 @@
 import time
 import random
+import turtle
 from turtle import Screen
 from spaceship import Spaceship
-from ball import Ball
 from obstacle import Obstacle
 from scoreboard import Scoreboard
 from aliens import Aliens
@@ -18,54 +18,56 @@ screen.tracer(0)
 paddle_start_coordinates = (0, -200)
 spaceship = Spaceship(paddle_start_coordinates)
 
-# ball = Ball()
 wall = Obstacle()
 wall.build_wall()
 scoreboard = Scoreboard()
 aliens = Aliens()
 
+
 game_is_on = False
-is_paused = False
 
 
-def start_or_pause_game():
-    global game_is_on, is_paused
-    if not game_is_on:
-        game_is_on = True
-        game_loop()
-    else:
-        is_paused = not is_paused
+def wait_for_enter():
+    turtle.textinput("Next Level", "Press Enter to continue...")
+    start_game()
+
+
+def start_game():
+    global game_is_on
+    # if not game_is_on:
+    game_is_on = True
+    game_loop()
+
+    # else:
+    #     is_paused = not is_paused
+
 
 screen.listen()
 screen.onkey(spaceship.move_left, "Left")
 screen.onkey(spaceship.move_right, "Right")
 
-screen.onkey(fun=start_or_pause_game, key="Return")
+screen.onkey(fun=start_game, key="Return")
 screen.onkey(spaceship.shoot, key="space")
 scoreboard.write_instructions()
 
-ships = 3
-unique_brick = []
-balls_2_last_x = []
-ufo_x_coords = []
-direction = 1
+ufo_ammos = 50  # the smaller the value, the more ammo ufos will shoot start with 50
 
 
 def game_loop():
-    global ships, ball, direction
-    #TODO: integrate pause functionality
+    global game_is_on, ufo_ammos
+
+    unique_brick = []
+    ufo_x_coords = []
+    direction = 1
+    ships = 3
+
     scoreboard.make_line()
     scoreboard.available_ships(ships)
     scoreboard.write_score()
     aliens.place_ships()
     while game_is_on:
-        # if scoreboard.space_pos == 0:
-        #     game_is_on = True
-        # elif scoreboard.space_pos == 1:
-        #     game_is_on = False
 
         screen.update()
-        # ball.move_ball()
         spaceship.move_ammo()
         aliens.move_ammo()
 
@@ -75,56 +77,26 @@ def game_loop():
             if max(ufo_x_coords) >= 380:
                 direction = -1
                 ufo_x_coords.clear()
+                aliens.move_ufos_lower()
             elif min(ufo_x_coords) <= -380:
                 direction = 1
                 ufo_x_coords.clear()
+                aliens.move_ufos_lower()
 
             # Aliens shoot when close to players ship
             spaceship_x = spaceship.xcor()
             x_abs_player_ufo = abs(ufo.xcor() - spaceship_x)
 
-            if x_abs_player_ufo <= 100 and random.randint(0, 20) == 7:
+            if x_abs_player_ufo <= 100 and random.randint(0, ufo_ammos) == 7:
                 aliens.shoot(ufo)
-        aliens.move_ufos(direction)
-
-
-
-        #aliens.shoot()
-
-        # # Detect floor "collision"
-        # if ball.ycor() < -290:
-        #     ships -= 1
-        #     ball.hideturtle()
-        #     ball.clear()
-        #     if ships > 0:
-        #         ball = Ball()
-        #         scoreboard.remove_ship()
-        #     else:
-        #         scoreboard.end_game()
-        #         break
-
-        # # Detect roof collision
-        # if ball.ycor() > 290:
-        #     # ball.bounce_y()
-        #     scoreboard.finish()
-        #     break
-
-        # # Detect paddle collision
-        # if ball.ycor() < -230 and ball.distance(spaceship) < 50:
-        #     # Determine the ball trajectory
-        #     if balls_2_last_x[0] < balls_2_last_x[1]:
-        #         direction = 0  # ball is coming from left to right
-        #     else:
-        #         direction = 1  # ball is coming from right to left
-        #     # calculate balls relative position to the paddle
-        #     # negative value means on the left and positive on the right
-        #     paddle_ball_x = ball.xcor() - spaceship.xcor()
-        #     ball.paddle_bounce_y(position=paddle_ball_x, direction=direction)
+        aliens.move_ufos_sideways(direction)
 
         # Detect brick collision
         for brick in wall.brick_pos:
             x, y = brick  # bricks coordinates
             if brick not in unique_brick:  # check if brick has already been hit, thus removed
+
+                # For player ammos
                 for ammo in spaceship.ammo_pos:
                     # calculate absolute vertical and horizontal distance from ball to brick
                     x_abs_to_ammo = abs(ammo.xcor() - x)
@@ -139,6 +111,29 @@ def game_loop():
                         scoreboard.score += 25  # add score
                         scoreboard.write_score()  # write it on the screen
 
+                    # Remove players ammos when they get out of the screen
+                    if ammo.ycor() > 300:
+                        spaceship.remove_ammo(ammo.pos())
+                        spaceship.ammo_pos.remove(ammo)
+
+                # For ufo ammos
+                for ufo_ammo in aliens.ammo_pos:
+                    # calculate absolute vertical and horizontal distance from ball to brick
+                    x_abs_to_ufo_ammo = abs(ufo_ammo.xcor() - x)
+                    y_abs_to_ufo_ammo = abs(ufo_ammo.ycor() - y)
+                    # if both of the aforementioned distances are smaller than the size
+                    # of the brick (100 x 20), measured from the middle, the ball has hit the brick
+                    if x_abs_to_ufo_ammo < 25 and y_abs_to_ufo_ammo < 5:
+                        unique_brick.append(brick)  # # add the brick to list of unique bricks
+                        wall.remove_brick(brick)  # and remove it so that it can't be hit again
+                        aliens.remove_ammo(ufo_ammo.pos())
+                        aliens.ammo_pos.remove(ufo_ammo)
+
+                    # Remove ufos ammos when they get out of the screen
+                    if ufo_ammo.ycor() < -300:
+                        aliens.remove_ammo(ufo_ammo.pos())
+                        aliens.ammo_pos.remove(ufo_ammo)
+
         # Detect ammo - ufo collision
         for ufo in aliens.ufos:
             ufo_x, ufo_y = ufo.pos()
@@ -150,6 +145,33 @@ def game_loop():
                     aliens.remove_ufo(ufo)
                     spaceship.remove_ammo(ammo.pos())
                     spaceship.ammo_pos.remove(ammo)
+                    scoreboard.score += 50  # add score
+                    scoreboard.write_score()  # write it on the screen
+
+                    # Detect defeated ufos
+                    if len(aliens.ufos) == 0:
+                        scoreboard.finish()
+                        ufo_ammos -= 5
+
+                        # Wait for the user to press Enter
+                        wait_for_enter()
+
+        # Detect ufo ammo - player collision
+        for ammo in aliens.ammo_pos:
+            ammo_x, ammo_y = ammo.pos()
+
+            # calculate absolute vertical and horizontal distance from ufo ammo to player
+            x_abs_ufo_ammo_player = abs(ammo_x - spaceship.xcor())
+            y_abs_ufo_ammo_player = abs(ammo_y - spaceship.ycor())
+
+            if x_abs_ufo_ammo_player < 12 and y_abs_ufo_ammo_player < 2:
+                if ships > 1:
+                    ships -= 1
+                    scoreboard.remove_ship()
+                else:
+                    scoreboard.end_game()
+                    game_is_on = False
+                    break
 
         time.sleep(0.01)
 
